@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace AdventOfCode;
 
@@ -8,13 +9,14 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        using (var fileStream = File.OpenRead("input2.txt"))
+        using (var fileStream = File.OpenRead("input3.txt"))
         using (var streamReader = new StreamReader(fileStream, System.Text.Encoding.UTF8))
         {
-            dayTwoPartTwo(streamReader);
+            dayThreePartTwo(streamReader);
         }
     }
 
+    #region dayOne
     static void dayOnePartOne(StreamReader streamReader)
     {
         List<int> firstColumn = new List<int>();
@@ -62,6 +64,9 @@ internal class Program
         int sum = firstColumn.Sum();
         Console.WriteLine(sum);
     }
+
+    #endregion dayOne
+    #region dayTwo
 
     static void dayTwoPartOne(StreamReader reader) 
     {
@@ -155,5 +160,41 @@ internal class Program
             if (Math.Abs(numbers[i] - numbers[i + 1]) > 3) { isSafe = false; break; }
         }
         return isSafe;
+    }
+
+    #endregion dayTwo
+
+    static void dayThreePartOne(StreamReader reader)
+    {
+        int total = 0;
+        string line;
+        string regex = @"mul\((\d+),(\d+)\)";
+        while ((line = reader.ReadLine()) != null)
+        {
+            var matches = Regex.Matches(line, regex);
+            foreach (Match match in matches) 
+            {
+                total += (int.Parse(match.Groups[1].Value) * int.Parse(match.Groups[2].Value));
+            }
+        }
+        Console.WriteLine(total);
+    }
+
+    static void dayThreePartTwo(StreamReader reader) 
+    { 
+        int total = 0; 
+        string line;
+        string regex = @"mul\((\d+),(\d+)\)|do\(\)|don't\(\)";
+        bool doMul = true;
+        while ((line = reader.ReadLine()) != null)
+        {
+            var matches = Regex.Matches(line, regex);
+            foreach (Match match in matches)
+            {
+                if (match.Value == "do()" || match.Value == "don't()") doMul = match.Value == "do()";
+                else if (doMul) total += (int.Parse(match.Groups[1].Value) * int.Parse(match.Groups[2].Value));
+            }
+        }
+        Console.WriteLine(total);
     }
 }
