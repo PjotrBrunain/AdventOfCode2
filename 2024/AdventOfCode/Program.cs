@@ -9,10 +9,10 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        using (var fileStream = File.OpenRead("input4.txt"))
+        using (var fileStream = File.OpenRead("input5.txt"))
         using (var streamReader = new StreamReader(fileStream, System.Text.Encoding.UTF8))
         {
-            dayFourPartTwo(streamReader);
+            dayFivePartOne(streamReader);
         }
     }
 
@@ -433,4 +433,116 @@ internal class Program
     }
 
     #endregion dayFour
+
+    #region dayFive
+
+    static void dayFivePartOne(StreamReader reader) 
+    {
+        string line;
+        List<Tuple<int,int>> rules = new List<Tuple<int,int>>();
+        List<List<int>> manuals = new List<List<int>>();
+        bool readingManuals = false;
+        while ((line = reader.ReadLine()) != null)
+        {
+            if (line.Length <= 0) 
+            { 
+                readingManuals = true;
+                continue;
+            }
+            if (!readingManuals)
+            {
+                string[] numbers = line.Split('|');
+                if (numbers.Length < 2) continue;
+                rules.Add(new Tuple<int, int>(int.Parse(numbers[0]), int.Parse(numbers[1])));
+            }
+            else
+            {
+                string[] numbers = line.Split(',');
+                List<int> manual = new List<int>();
+                foreach (string number in numbers)
+                {
+                    manual.Add(int.Parse(number));
+                }
+                manuals.Add(manual);
+            }
+        }
+
+        List<List<int>> correctManuals = new List<List<int>>();
+        List<List<int>> incorrectManuals = new List<List<int>>();
+
+        foreach (List<int> manual in manuals) 
+        {
+            if (IsManualCorrect(manual, rules)) correctManuals.Add(manual);
+            else incorrectManuals.Add(manual);
+        }
+
+        int total = 0;
+        foreach (List<int> manual in correctManuals)
+        {
+            total += manual[manual.Count / 2];
+        }
+
+        Console.WriteLine(total);
+
+        dayFivePartTwo(rules, incorrectManuals);
+    }
+
+    static void dayFivePartTwo(List<Tuple<int, int>> rules, List<List<int>> incorrectManuals)
+    {
+        List<List<int>> correctedManuals = new List<List<int>>();
+        foreach (List<int> incorrectManual in incorrectManuals)
+        {
+            correctedManuals.Add(CorrectList(incorrectManual, rules, 0));
+        }
+
+        int total = 0;
+        foreach (List<int> manual in correctedManuals)
+        {
+            total += manual[manual.Count / 2];
+        }
+
+        Console.WriteLine(total);
+    }
+
+    private static List<int> CorrectList(List<int> incorrectManual, List<Tuple<int, int>> rules, int currentNumber)
+    {
+        List<int> correctedManual = new List<int>();
+        foreach(int number in incorrectManual)
+        {
+            List<int> testManual = correctedManual.ToList();
+            int index = 0;
+            do
+            {
+                testManual = correctedManual.ToList();
+                testManual.Insert(index++, number);
+            }
+            while (!IsManualCorrect(testManual, rules));
+            correctedManual = testManual.ToList();
+        }
+        return correctedManual;
+    }
+
+    private static bool IsManualCorrect(List<int> manual, List<Tuple<int, int>> rules)
+    {
+        bool isCorrect = true;
+        for (int i = 0; i < manual.Count; i++)
+        {
+            int currentNum = manual[i];
+            rules.Where(x => x.Item1 == currentNum || x.Item2 == currentNum).ToList().ForEach(x => {
+                if (x.Item1 == currentNum) 
+                {
+                    int index = manual.IndexOf(x.Item2);
+                    if (index >= 0 && index <= i) isCorrect = false;
+                }
+                else
+                {
+                    int index = manual.IndexOf(x.Item1);
+                    if (index >= 0 && index >= i) isCorrect = false;
+                }
+            });
+        }
+        return isCorrect;
+    }
+
+    #endregion dayFive
 }
