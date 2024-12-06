@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace AdventOfCode;
@@ -9,10 +10,10 @@ internal class Program
 {
     static void Main(string[] args)
     {
-        using (var fileStream = File.OpenRead("input5.txt"))
+        using (var fileStream = File.OpenRead("input6.txt"))
         using (var streamReader = new StreamReader(fileStream, System.Text.Encoding.UTF8))
         {
-            dayFivePartOne(streamReader);
+            daySixPartOne(streamReader);
         }
     }
 
@@ -545,4 +546,139 @@ internal class Program
     }
 
     #endregion dayFive
+
+    #region daySix
+
+    static void daySixPartOne(StreamReader reader)
+    {
+        string line;
+        List<string> map = new List<string>();
+        while ((line = reader.ReadLine()) != null)
+        {
+            map.Add(line);
+        }
+
+        List<string> completedMaze = WalkMaze(map);
+
+        int total = 0;
+        completedMaze.ForEach(x => { total += x.Count(character => character == 'X'); });
+
+        Console.WriteLine(total);
+    }
+
+    private static List<string> WalkMaze(List<string> map)
+    {
+        for (int i = 0; i < map.Count; i++)
+        {
+            for (int j = 0; j < map[i].Length; j++)
+            {
+                switch (map[i][j]) 
+                {
+                    case '<':
+                        if (j - 1 < 0)
+                        {
+                            StringBuilder sb = new StringBuilder(map[i]);
+                            sb[j] = 'X';
+                            map[i] = sb.ToString();
+                            return map;
+                        }
+                        else if (map[i][j-1] == '#')
+                        {
+                            StringBuilder sb = new StringBuilder(map[i]);
+                            sb[j] = '^';
+                            map[i] = sb.ToString();
+                            return WalkMaze(map);
+                        }
+                        else /*if (map[i][j] == '.')*/
+                        {
+                            StringBuilder sb = new StringBuilder(map[i]);
+                            sb[j] = 'X';
+                            sb[j - 1] = '<';
+                            map[i] = sb.ToString();
+                            return WalkMaze(map);
+                        }
+                        break;
+                    case '^':
+                        if (i - 1 < 0)
+                        {
+                            StringBuilder sb = new StringBuilder(map[i]);
+                            sb[j] = 'X';
+                            map[i] = sb.ToString();
+                            return map;
+                        }
+                        else if (map[i - 1][j] == '#')
+                        {
+                            StringBuilder sb = new StringBuilder(map[i]);
+                            sb[j] = '>';
+                            map[i] = sb.ToString();
+                            return WalkMaze(map);
+                        }
+                        else /*if (map[i - 1][j] == '.')*/
+                        {
+                            StringBuilder sb = new StringBuilder(map[i]);
+                            sb[j] = 'X';
+                            map[i] = sb.ToString();
+                            sb = new StringBuilder(map[i-1]);
+                            sb[j] = '^';
+                            map[i-1] = sb.ToString();
+                            return WalkMaze(map);
+                        }
+                        break;
+                    case '>':
+                        if (j + 1 >= map[i].Length)
+                        {
+                            StringBuilder sb = new StringBuilder(map[i]);
+                            sb[j] = 'X';
+                            map[i] = sb.ToString();
+                            return map;
+                        }
+                        else if (map[i][j+1] == '#')
+                        {
+                            StringBuilder sb = new StringBuilder(map[i]);
+                            sb[j] = 'v';
+                            map[i] = sb.ToString();
+                            return WalkMaze(map);
+                        }
+                        else /*if (map[i][j+1] == '.')*/
+                        {
+                            StringBuilder sb = new StringBuilder(map[i]);
+                            sb[j] = 'X';
+                            sb[j + 1] = '>';
+                            map[i] = sb.ToString();
+                            return WalkMaze(map);
+                        }
+                        break;
+                    case 'v':
+                        if (i + 1 >= map.Count) 
+                        {
+                            StringBuilder sb = new StringBuilder(map[i]);
+                            sb[j] = 'X';
+                            map[i] = sb.ToString();
+                            return map;
+                        }
+                        else if (map[i + 1][j] == '#')
+                        {
+                            StringBuilder sb = new StringBuilder(map[i]);
+                            sb[j] = '<';
+                            map[i] = sb.ToString();
+                            return WalkMaze(map);
+                        }
+                        else /*if (map[i + 1][j] == '.')*/
+                        {
+                            StringBuilder sb = new StringBuilder(map[i]);
+                            sb[j] = 'X';
+                            map[i] = sb.ToString();
+                            sb = new StringBuilder(map[i+1]);
+                            sb[j] = 'v';
+                            map[i+1] = sb.ToString();
+                            return WalkMaze(map);
+                        }
+                        break;
+                }
+            }
+        }
+        return map;
+    }
+
+    #endregion daySix
 }
