@@ -13,7 +13,7 @@ internal class Program
         using (var fileStream = File.OpenRead("input6.txt"))
         using (var streamReader = new StreamReader(fileStream, System.Text.Encoding.UTF8))
         {
-            daySixPartOne(streamReader);
+            daySixPartTwo(streamReader);
         }
     }
 
@@ -558,7 +558,7 @@ internal class Program
             map.Add(line);
         }
 
-        List<string> completedMaze = WalkMaze(map);
+        List<string> completedMaze = WalkMaze(map, 0);
 
         int total = 0;
         completedMaze.ForEach(x => { total += x.Count(character => character == 'X'); });
@@ -566,8 +566,13 @@ internal class Program
         Console.WriteLine(total);
     }
 
-    private static List<string> WalkMaze(List<string> map)
+    private static List<string> WalkMaze(List<string> map, int iterationCount)
     {
+        iterationCount++;
+        if (iterationCount > map.Count * map[0].Length) 
+        { 
+            return new List<string>();
+        }
         for (int i = 0; i < map.Count; i++)
         {
             for (int j = 0; j < map[i].Length; j++)
@@ -587,7 +592,7 @@ internal class Program
                             StringBuilder sb = new StringBuilder(map[i]);
                             sb[j] = '^';
                             map[i] = sb.ToString();
-                            return WalkMaze(map);
+                            return WalkMaze(map, iterationCount);
                         }
                         else /*if (map[i][j] == '.')*/
                         {
@@ -595,7 +600,7 @@ internal class Program
                             sb[j] = 'X';
                             sb[j - 1] = '<';
                             map[i] = sb.ToString();
-                            return WalkMaze(map);
+                            return WalkMaze(map, iterationCount);
                         }
                         break;
                     case '^':
@@ -611,7 +616,7 @@ internal class Program
                             StringBuilder sb = new StringBuilder(map[i]);
                             sb[j] = '>';
                             map[i] = sb.ToString();
-                            return WalkMaze(map);
+                            return WalkMaze(map, iterationCount);
                         }
                         else /*if (map[i - 1][j] == '.')*/
                         {
@@ -621,7 +626,7 @@ internal class Program
                             sb = new StringBuilder(map[i-1]);
                             sb[j] = '^';
                             map[i-1] = sb.ToString();
-                            return WalkMaze(map);
+                            return WalkMaze(map, iterationCount);
                         }
                         break;
                     case '>':
@@ -637,7 +642,7 @@ internal class Program
                             StringBuilder sb = new StringBuilder(map[i]);
                             sb[j] = 'v';
                             map[i] = sb.ToString();
-                            return WalkMaze(map);
+                            return WalkMaze(map, iterationCount);
                         }
                         else /*if (map[i][j+1] == '.')*/
                         {
@@ -645,7 +650,7 @@ internal class Program
                             sb[j] = 'X';
                             sb[j + 1] = '>';
                             map[i] = sb.ToString();
-                            return WalkMaze(map);
+                            return WalkMaze(map, iterationCount);
                         }
                         break;
                     case 'v':
@@ -661,7 +666,7 @@ internal class Program
                             StringBuilder sb = new StringBuilder(map[i]);
                             sb[j] = '<';
                             map[i] = sb.ToString();
-                            return WalkMaze(map);
+                            return WalkMaze(map, iterationCount);
                         }
                         else /*if (map[i + 1][j] == '.')*/
                         {
@@ -671,13 +676,44 @@ internal class Program
                             sb = new StringBuilder(map[i+1]);
                             sb[j] = 'v';
                             map[i+1] = sb.ToString();
-                            return WalkMaze(map);
+                            return WalkMaze(map, iterationCount);
                         }
                         break;
                 }
             }
         }
         return map;
+    }
+
+    static void daySixPartTwo(StreamReader reader)
+    {
+        string line;
+        List<string> map = new List<string>();
+        while ((line = reader.ReadLine()) != null)
+        {
+            map.Add(line);
+        }
+
+        int total = 0;
+
+        for (int i = 0; i < map.Count; i++)
+        {
+            Console.WriteLine("currently on line " + i);
+            for (int j = 0; j < map[i].Length; j++)
+            {
+                List<string> newMap = map.ToList();
+                if (map[i][j] == '.')
+                {
+                    StringBuilder sb = new StringBuilder(map[i]);
+                    sb[j] = '#';
+                    newMap[i] = sb.ToString();
+                    if (WalkMaze(newMap, 0).Count == 0) total++;
+                }
+            }
+        }
+
+        Console.WriteLine(total);
+        Console.ReadLine();
     }
 
     #endregion daySix
